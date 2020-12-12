@@ -8,27 +8,32 @@ const byte BOTTOM = 11;
 
 enum {ON, OFF, BLINK};
 
-int led[3][9];
-int lasttime;
+#define TOTAL_LEVEL 3
+#define LED_PER_LEVEL 9
+int led[TOTAL_LEVEL][LED_PER_LEVEL];
+
 int state = 0;
+
+unsigned long lasttime;
+unsigned long currenttime;
 
 void setup() {
   randomSeed(analogRead(5));
   
-  for (int i = 0; i < 12; i++)
+  for (int i = 0; i < TOTAL_LEVEL + LED_PER_LEVEL; i++)
     pinMode(i, OUTPUT);
     
-  for (int level = 0; level < 3; level++) {
-    for (int i = 0; i < 9; i++) {
+  for (int level = 0; level < TOTAL_LEVEL; level++) {
+    for (int i = 0; i < LED_PER_LEVEL; i++) {
       led[level][i] = OFF;
     }
   }
   
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < LED_PER_LEVEL; i++) {
     led[0][i] = ON;
   }
   
-  lasttime = millis() / 1000;
+  lasttime = millis();
 }
 
 void set(int level, int n) {
@@ -53,9 +58,8 @@ void clr(int level, int n) {
 }
 
 void display() {
-  unsigned long t = millis();
-  for (int level = 0; level < 3; level++) {
-    for (int i = 0; i < 9; i++) {
+  for (int level = 0; level < TOTAL_LEVEL; level++) {
+    for (int i = 0; i < LED_PER_LEVEL; i++) {
       switch (led[level][i]) {
         case ON:
           set(level, i);
@@ -64,7 +68,7 @@ void display() {
           clr(level, i);
           break;
         case BLINK:
-          if ((t / 100) % 2 == 0)      
+          if ((currenttime / 100) % 2 == 0)      
             set(level, i);
           else
             clr(level, i);
@@ -81,7 +85,7 @@ void update() {
   switch(state % 6) {
     case 2:
       // find a dot on top or a bottom and blink
-       select = random(9);
+       select = random(LED_PER_LEVEL);
        fall = led[0][select] == ON;
        if (fall) led[0][select] = BLINK;
        else      led[2][select] = BLINK;
@@ -105,8 +109,8 @@ void update() {
 }
 
 void loop() {
-  int currenttime = millis() / 1000;
-  if (currenttime == lasttime) {
+  currenttime = millis();
+  if (currenttime / 1000 == lasttime / 1000) {
     display();
   } else {
     lasttime = currenttime;
