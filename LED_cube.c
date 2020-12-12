@@ -5,13 +5,16 @@ each column has common cathod - connect to PIN 0-8
 const byte TOP = 9;
 const byte MIDDLE = 10;
 const byte BOTTOM = 11;
+
 enum {ON, OFF, BLINK};
+
 int led[3][9];
 int lasttime;
 int state = 0;
 
 void setup() {
   randomSeed(analogRead(5));
+  
   for (int i = 0; i < 12; i++)
     pinMode(i, OUTPUT);
     
@@ -27,7 +30,6 @@ void setup() {
   
   lasttime = millis() / 1000;
 }
-
 
 void set(int level, int n) {
   int a[] = {HIGH, HIGH, HIGH};
@@ -48,7 +50,6 @@ void clr(int level, int n) {
   digitalWrite(TOP, HIGH);
   digitalWrite(MIDDLE, HIGH);
   digitalWrite(BOTTOM, HIGH);
-
 }
 
 void display() {
