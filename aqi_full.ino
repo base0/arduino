@@ -84,8 +84,20 @@ void setup() {
   getDistricts();
 }
 
+int map2(int val, int min, int max, int slot) {
+   return map(val, min, max, 0, slot-1);
+}
+
 void loop() {
-  static int index;
+  static int index = -1;
+
+  int analogVal = analogRead(A0);
+  if (index == map2(analogVal, 0, 1023, total_district)) {
+    delay(200);
+    return;
+  }
+  index = map2(analogVal, 0, 1023, total_district);
+  
   String result = getAQI(district[index]);
   deserializeJson(doc, result);
   int aqi = doc["data"]["current"]["pollution"]["aqius"];
@@ -99,7 +111,7 @@ void loop() {
   } else {
     lcd.print("N/A");
   }
-  index++;
-  if (index == total_district) index = 0;
-  delay(3000);
+  //index++;
+  //if (index == total_district) index = 0;
+  //delay(3000);
 }
