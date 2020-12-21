@@ -90,33 +90,54 @@ int map2(int val, int min, int max, int slot) {
 
 void loop() {
   static int index = -1;
+  static int lastIndex = -1;
+  static long lastUpdate;
 
+  long current = millis();
   int analogVal = analogRead(A0);
-  Serial.println(analogVal);
-  if (index == map2(analogVal, 0, 1023, total_district)) {
-    delay(300);
-    return;
-  }
-  index = map2(analogVal, 0, 1023, total_district);
-
-  while (true) {
-    String result = getAQI(district[index]);
-    deserializeJson(doc, result);
-    int aqi = doc["data"]["current"]["pollution"]["aqius"];
-    Serial.println(aqi);
+  if (index != map2(analogVal, 0, 1023, total_district)) {
+    Serial.print("index != map");
+    Serial.print(index);
+    Serial.println();
+    index = map2(analogVal, 0, 1023, total_district);
+    lastUpdate = current;
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(district[index]);
-    lcd.setCursor(0, 1);
-  
-    if (myHttpClient.getHttpCode() == 200) {
-      lcd.print(aqi);
-      break;
-    } else {
-      lcd.print("N/A");
-      delay(3000);
-    }
+
+    return;
+  } else if (current - lastUpdate < 1000) {
+    Serial.print("curr - last < 1000");
+    Serial.print(current);
+    Serial.print(" ");
+    Serial.print(lastUpdate);
+    Serial.println();
+
+    return;
   }
+
+  if (index == lastIndex) {
+    return;
+  }
+
+  lastIndex = index;
+
+  String result = getAQI(district[index]);
+  deserializeJson(doc, result);
+  int aqi = doc["data"]["current"]["pollution"]["aqius"];
+  Serial.println(aqi);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print(district[index]);
+  lcd.setCursor(0, 1);
+
+  if (myHttpClient.getHttpCode() == 200) {
+    lcd.print(aqi);
+  } else {
+    lcd.print("N/A");
+  }
+
+
 
   //delay(300);
   //index++;
