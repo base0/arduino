@@ -85,32 +85,40 @@ void setup() {
 }
 
 int map2(int val, int min, int max, int slot) {
-   return map(val, min, max, 0, slot-1);
+  return map(val, min, max, 0, slot - 1);
 }
 
 void loop() {
   static int index = -1;
 
   int analogVal = analogRead(A0);
+  Serial.println(analogVal);
   if (index == map2(analogVal, 0, 1023, total_district)) {
-    delay(200);
+    delay(300);
     return;
   }
   index = map2(analogVal, 0, 1023, total_district);
+
+  while (true) {
+    String result = getAQI(district[index]);
+    deserializeJson(doc, result);
+    int aqi = doc["data"]["current"]["pollution"]["aqius"];
+    Serial.println(aqi);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(district[index]);
+    lcd.setCursor(0, 1);
   
-  String result = getAQI(district[index]);
-  deserializeJson(doc, result);
-  int aqi = doc["data"]["current"]["pollution"]["aqius"];
-  Serial.println(aqi);
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print(district[index]);
-  lcd.setCursor(0, 1);
-  if (myHttpClient.getHttpCode() == 200) {
-    lcd.print(aqi);
-  } else {
-    lcd.print("N/A");
+    if (myHttpClient.getHttpCode() == 200) {
+      lcd.print(aqi);
+      break;
+    } else {
+      lcd.print("N/A");
+      delay(3000);
+    }
   }
+
+  //delay(300);
   //index++;
   //if (index == total_district) index = 0;
   //delay(3000);
