@@ -1,3 +1,5 @@
+// light dependent resistor
+
 void setup() {
   Serial.begin(9600); 
 }
